@@ -85,7 +85,7 @@ def main() -> int:
             **shared,
             "topics": [topic_ctx(p) for p in ks.nav],
             "popular": [
-                {"title": q.title, "href": f"{model.QA_SLUG}.html#{q.id}"} for q in ks.popular()
+                {"title": q.title, "href": f"{model.QA_SLUG}.html#{q.id}"} for q in ks.popular(limit=None)
             ],
         },
     )

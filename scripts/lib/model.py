@@ -94,9 +94,12 @@ class KnowledgeSite:
     def qa_page(self):
         return self.page(QA_SLUG)
 
-    def popular(self, limit: int = 6) -> list:
+    def popular(self, limit: int | None = 6) -> list:
+        """首頁的問題清單。limit 為 None 時列出全部。"""
         page = self.qa_page
-        return page.questions[:limit] if page else []
+        if not page:
+            return []
+        return page.questions if limit is None else page.questions[:limit]
 
 
 _H2 = re.compile(r"^##\s+(.*)$")
