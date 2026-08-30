@@ -15,11 +15,13 @@
       "Edit(./source/**)",
       "Write(./source/**)"
     ],
+    "ask": [
+      "Write(./content/**)",
+      "Edit(./content/**)"
+    ],
     "allow": [
-      "Read(./content/**)",
       "Read(./design/**)",
       "Read(./source/**)",
-      "Edit(./content/**)",
       "Edit(./site/**)",
       "Edit(./memory/**)",
       "Bash(python3 scripts/build.py:*)",
