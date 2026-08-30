@@ -1,0 +1,38 @@
+<section class="hero">
+  <h1 class="hero-title">{{site.kb_name}}</h1>
+  <p class="hero-tagline">{{site.tagline}}</p>
+</section>
+
+{{> search}}
+
+<section class="section" aria-labelledby="cat-heading">
+  <h2 id="cat-heading" class="section-title">依主題瀏覽</h2>
+  <ul class="category-grid">
+  {{#categories}}
+    <li class="category-card">
+      <a class="category-link" href="{{href}}">
+        <span class="category-icon" aria-hidden="true">{{icon}}</span>
+        <span class="category-name">{{name}}</span>
+      </a>
+      <p class="category-summary">{{summary}}</p>
+      <p class="category-count">{{count}} 則問題</p>
+    </li>
+  {{/categories}}
+  </ul>
+</section>
+
+<section class="section" aria-labelledby="hot-heading">
+  <h2 id="hot-heading" class="section-title">熱門問題</h2>
+  {{> card-list}}
+</section>
+
+<section class="section" aria-labelledby="recent-heading">
+  <h2 id="recent-heading" class="section-title">最近更新</h2>
+  <ul class="recent-list">
+  {{#recent}}
+    <li><a href="{{href}}">{{title}}</a><span class="recent-date">{{updated}}</span></li>
+  {{/recent}}
+  </ul>
+</section>
+
+{{> contact}}

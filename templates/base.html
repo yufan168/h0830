@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="{{site.locale}}" data-theme="auto">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{page_title}}</title>
+<meta name="description" content="{{page_description}}" />
+<link rel="canonical" href="{{canonical}}" />
+<meta property="og:title" content="{{page_title}}" />
+<meta property="og:description" content="{{page_description}}" />
+<meta property="og:type" content="website" />
+<link rel="stylesheet" href="{{rel}}assets/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%92%A1%3C/text%3E%3C/svg%3E" />
+<script>
+(function(){try{var t=localStorage.getItem('kb-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要內容</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="{{rel}}index.html">
+      <span class="brand-mark" aria-hidden="true">💡</span>
+      <span class="brand-text">
+        <strong>{{site.name}}</strong>
+        <span>{{site.kb_name}}</span>
+      </span>
+    </a>
+    <button type="button" class="theme-toggle" data-theme-toggle aria-label="切換淺色或深色主題">
+      <span aria-hidden="true">◐</span>
+      <span class="theme-toggle-text">主題</span>
+    </button>
+  </div>
+</header>
+<main id="main" class="container">
+{{{content}}}
+</main>
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p class="footer-line">{{site.name}}{{site.kb_name}}｜知識庫版本 {{site.version}}</p>
+    <p class="footer-line footer-muted">最後建置時間 {{build_time}}</p>
+  </div>
+</footer>
+<script src="{{rel}}assets/app.js" defer></script>
+</body>
+</html>

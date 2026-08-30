@@ -1,0 +1,4 @@
+# 建置引擎只用到 PyYAML，其餘皆為 Python 標準函式庫。
+# 若環境沒有 PyYAML，scripts/lib/frontmatter.py 會自動退回內建的極簡解析器，
+# 但僅支援 taxonomy 與 frontmatter 用到的語法子集，正式環境仍建議安裝。
+PyYAML>=6.0

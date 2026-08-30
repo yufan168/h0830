@@ -1,0 +1,49 @@
+<nav class="breadcrumb" aria-label="麵包屑">
+  <ol>
+    <li><a href="{{rel}}index.html">{{site.kb_name}}</a></li>
+    <li><a href="{{category.href}}">{{category.name}}</a></li>
+    <li aria-current="page">{{card.title}}</li>
+  </ol>
+</nav>
+
+<h1 class="article-title">{{card.title}}</h1>
+
+<p class="article-meta">
+  <span class="badge {{card.status_css}}">{{card.status_label}}</span>
+  <span class="article-meta-item">更新於 {{card.updated}}</span>
+  <span class="article-meta-item">負責窗口 {{card.owner}}</span>
+</p>
+
+{{#card.is_deprecated}}
+<div class="notice notice-danger" role="note">
+  <strong>這則說明已停用。</strong>內容僅供查閱歷史紀錄，實際規則請以最新公告為準。
+</div>
+{{/card.is_deprecated}}
+{{#card.is_review}}
+<div class="notice notice-warn" role="note">
+  <strong>這則說明審核中。</strong>內容可能還會調整，如有疑問請直接聯絡客服確認。
+</div>
+{{/card.is_review}}
+
+<p class="answer-summary">{{card.summary}}</p>
+
+<article class="article-body">
+{{{card.html}}}
+</article>
+
+<p class="tag-row">
+{{#card.tags}}<span class="tag">{{.}}</span>{{/card.tags}}
+</p>
+
+<section class="related" aria-labelledby="related-heading">
+  <h2 id="related-heading">相關問題</h2>
+  <ul class="related-list">
+  {{#related}}
+    <li><a href="{{href}}">{{title}}</a><span class="related-summary">{{summary}}</span></li>
+  {{/related}}
+  </ul>
+</section>
+
+<p class="print-url">本頁網址：{{canonical}}</p>
+
+{{> contact}}
