@@ -117,7 +117,14 @@ def test_prose_rules() -> None:
     check("TODO 被擋", prose_errors("這段稍後補上 TODO。"))
     check("待補被擋", prose_errors("金額為 ［待補］ 元。"))
 
+    # 禁用詞
+    check("保證被擋", prose_errors("我們保證三個工作日內到貨。"))
+    check("一定被擋", prose_errors("這樣操作一定可以解決問題。"))
+    check("最便宜被擋", prose_errors("這是市面上最便宜的方案。"))
+    check("市場第一被擋", prose_errors("本產品的能效表現市場第一。"))
+
     # 不應該被擋
+    check("不一定放行", not prose_errors("帳單信箱不一定等於您的登入信箱。"))
     check("全形標點放行", not prose_errors("這是中文，全部使用全形標點。這樣可以嗎？"))
     check("全形括號放行", not prose_errors("服務時間為平日（國定假日休息）。"))
     check("英數半形標點放行", not prose_errors("可用性目標為每月 99.5%，時間為 09:00 至 18:00。"))
@@ -190,6 +197,16 @@ def test_structure_rules() -> None:
         check("失效錨點被擋", any("錨點" in e for e in report.errors))
 
 
+def test_output_list() -> None:
+    """產出清單必須由 content/ 推導，不得寫死頁面名稱。"""
+    import validate as V2
+
+    src = Path(V2.__file__).read_text(encoding="utf-8")
+    for hardcoded in ("products.html", "policy.html", "about.html"):
+        check(f"驗證器未寫死 {hardcoded}", hardcoded not in src)
+    check("faq.html 未被寫死為必要產出", "\"faq.html\"" not in src)
+
+
 def test_engine() -> None:
     html, headings = markdown.render("## 標題\n\n內文與 `程式碼`。\n\n| a | b |\n| --- | --- |\n| 1 | 2 |")
     check("markdown 產生標題", "<h2" in html and headings[0]["text"] == "標題")
@@ -221,6 +238,7 @@ def test_engine() -> None:
 def main() -> int:
     test_prose_rules()
     test_heading_rules()
+    test_output_list()
     test_structure_rules()
     test_engine()
 

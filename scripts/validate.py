@@ -39,8 +39,11 @@ EXTERNAL_SCHEME = re.compile(r"^(?:https?:)?//", re.I)
 
 REQUIRED_SITE_KEYS = ("name", "kb_name", "base_url", "locale", "version")
 REQUIRED_CONTACT_KEYS = ("hours", "email", "report_url", "note")
-EXPECTED_FILES = ("index.html", "products.html", "faq.html", "policy.html", "about.html",
-                  "404.html", "search-index.json", "sitemap.xml", "robots.txt")
+BANNED_WORDS = ("保證", "一定", "最便宜", "市場第一")
+# 「不一定」是否定用法，不是行銷宣稱，掃描前先挖掉避免誤殺。
+BANNED_EXEMPT = ("不一定",)
+# 與內容無關、永遠要有的產出。頁面本身由 content/ 推導，不寫死。
+FIXED_OUTPUTS = ("index.html", "404.html", "search-index.json", "sitemap.xml", "robots.txt")
 MAX_PAGE_KB = 120
 
 
@@ -217,6 +220,13 @@ def check_prose(rel: str, body: str, report: Report) -> None:
         text = INLINE_CODE.sub(" ", stripped)
         text = URL.sub(" ", text)
 
+        scan = text
+        for exempt in BANNED_EXEMPT:
+            scan = scan.replace(exempt, "　")
+        for word in BANNED_WORDS:
+            if word in scan:
+                report.gate("0.2", f"{rel}:{lineno} 出現禁用詞「{word}」：{stripped[:40]}")
+
         if PLACEHOLDER.search(text):
             report.gate("內容", f"{rel}:{lineno} 出現佔位符或未完成標記：{stripped[:40]}")
         if DASH.search(text):
@@ -253,13 +263,17 @@ def check_output(ks, report: Report) -> None:
         report.gate("2", "找不到 site/，請先執行 python3 scripts/build.py")
         return
 
-    for name in EXPECTED_FILES:
+    expected_html = {"index.html", "404.html"} | {p.filename for p in ks.pages}
+    for name in sorted(FIXED_OUTPUTS) + sorted(p.filename for p in ks.pages):
         if not (OUT / name).exists():
             report.gate("2", f"缺少產出檔 site/{name}")
 
-    extra = {p.name for p in OUT.glob("*.html")} - set(EXPECTED_FILES)
+    extra = {p.name for p in OUT.glob("*.html")} - expected_html
     if extra:
-        report.gate("2", f"site/ 出現契約以外的頁面：{', '.join(sorted(extra))}")
+        report.gate(
+            "2",
+            f"site/ 出現 content/ 沒有對應來源的頁面：{', '.join(sorted(extra))}",
+        )
 
     for path in sorted(OUT.glob("*.html")):
         check_page_structure(path, ks, report)

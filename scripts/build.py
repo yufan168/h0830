@@ -44,6 +44,8 @@ def main() -> int:
     if args.clean and OUT.exists():
         shutil.rmtree(OUT)
     (OUT / "assets").mkdir(parents=True, exist_ok=True)
+    # --clean 會連版控佔位檔一起刪掉，補回來，否則 git 會讓整個 site/ 消失。
+    (OUT / ".gitkeep").touch()
 
     engine = Engine(ROOT / "templates")
     site = ks.site
