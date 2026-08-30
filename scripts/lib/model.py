@@ -17,8 +17,9 @@ from pathlib import Path
 
 from . import frontmatter, markdown
 
-REQUIRED_FIELDS = ("title", "slug", "description", "updated", "owner", "nav_order", "nav_label")
-OPTIONAL_FIELDS = ("icon", "site", "noindex")
+REQUIRED_FIELDS = ("title", "slug", "description", "updated", "nav_order", "nav_label")
+# owner 沒有任何供給來源，設為必填等於逼人編造，改為選填並由驗證器以 REVIEW 級提醒。
+OPTIONAL_FIELDS = ("icon", "site", "noindex", "owner")
 QA_SLUG = "faq"
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -155,7 +156,7 @@ def load(root: Path) -> KnowledgeSite:
                 title=str(data["title"]),
                 description=str(data["description"]),
                 updated=str(data["updated"]),
-                owner=str(data["owner"]),
+                owner=str(data.get("owner") or ""),
                 nav_order=int(data["nav_order"]),
                 nav_label=str(data["nav_label"]),
                 icon=str(data.get("icon") or "📄"),

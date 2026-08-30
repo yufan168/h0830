@@ -3,7 +3,6 @@ title: 產品與方案
 slug: products
 description: 星光家電現售五款產品的適用坪數、保固說明與選購建議。
 updated: 2026-08-30
-owner: 產品行銷組
 nav_order: 1
 nav_label: 產品與方案
 icon: 📦

@@ -3,7 +3,6 @@ title: 關於星光家電
 slug: about
 description: 星光家電客服中心的服務範圍、服務時間與聯絡管道。
 updated: 2026-08-30
-owner: 客服知識組
 nav_order: 4
 nav_label: 聯絡我們
 icon: 📮

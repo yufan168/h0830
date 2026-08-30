@@ -227,6 +227,7 @@ def test_engine() -> None:
         check("問答頁被辨識", ks.qa_page is not None and len(ks.qa_page.questions) == 2)
         check("站台設定被讀到", bool(ks.site.get("contact", {}).get("email")))
         check("導覽依 nav_order 排序", [p.slug for p in ks.nav] == ["about", "faq"])
+        check("owner 為選填，缺了仍可載入", not any("owner" in e for e in ks.errors))
 
         empty = Path(tmp) / "empty"
         (empty / "content").mkdir(parents=True)

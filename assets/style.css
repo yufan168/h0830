@@ -251,7 +251,7 @@ mark { background: var(--color-brand-tint); color: inherit; padding-inline: 0.1e
 .qa-question::before {
   content: "＋";
   flex-shrink: 0;
-  color: var(--color-brand);
+  color: var(--color-brand-vivid);
   font-weight: 700;
 }
 .qa-item[open] .qa-question::before { content: "－"; }

@@ -3,7 +3,6 @@ title: 常見問題
 slug: faq
 description: 訂單、運費、退款、保固與產品使用的常見問題整理。
 updated: 2026-08-30
-owner: 客服知識組
 nav_order: 2
 nav_label: 常見問題
 icon: 💬

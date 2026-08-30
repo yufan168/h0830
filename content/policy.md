@@ -3,7 +3,6 @@ title: 服務政策
 slug: policy
 description: 退款、運費、VIP 折扣與保固的政策重點整理，完整條款以正式文件為準。
 updated: 2026-08-30
-owner: 客服知識組
 nav_order: 3
 nav_label: 服務政策
 icon: 📋

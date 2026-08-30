@@ -189,6 +189,9 @@ def check_content(page, report: Report) -> None:
         if dt.date.fromisoformat(page.updated) > dt.date.today():
             report.gate("內容", f"{rel}: updated「{page.updated}」是未來日期")
 
+    if not page.owner:
+        report.review("內容", f"{rel}: 沒有指定 owner，這份內容目前無人維護")
+
     if len(page.sections) < 2:
         report.gate("4.3", f"{rel}: 至少需要兩個 ## 區塊，目前只有 {len(page.sections)} 個")
 

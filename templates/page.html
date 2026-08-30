@@ -4,7 +4,7 @@
 
 <p class="page-meta">
   <span class="page-meta-item">更新於 {{page.updated}}</span>
-  <span class="page-meta-item">負責窗口 {{page.owner}}</span>
+  {{#page.owner}}<span class="page-meta-item">負責窗口 {{page.owner}}</span>{{/page.owner}}
 </p>
 
 {{#page.intro_html}}<div class="page-intro">{{{page.intro_html}}}</div>{{/page.intro_html}}
