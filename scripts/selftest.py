@@ -22,6 +22,69 @@ from lib import markdown, model, template  # noqa: E402
 PASSED = 0
 FAILED: list[str] = []
 
+FIXTURE_ABOUT = """---
+title: 關於我們
+slug: about
+description: 測試用說明。
+updated: 2020-01-01
+owner: 測試組
+nav_order: 1
+nav_label: 關於
+site:
+  name: 測試品牌
+  kb_name: 知識中心
+  base_url: https://example.test
+  locale: zh-Hant-TW
+  version: 1.0
+  contact:
+    hours: 平日九點到六點
+    email: a@example.test
+    report_url: https://example.test/r
+    note: 一個工作日內回覆。
+---
+
+## 第一節
+
+第一節的內容。
+
+## 第二節
+
+第二節的內容。
+"""
+
+FIXTURE_FAQ = """---
+title: 常見問題
+slug: faq
+description: 測試用問答。
+updated: 2020-01-01
+owner: 測試組
+nav_order: 2
+nav_label: 問答
+---
+
+## 分類一
+
+### 這是一個問題嗎？
+
+這是答案，長度足夠讓驗證器認為它有說明一件事情，並且使用全形標點。
+
+## 分類二
+
+### 另一個問題怎麼處理？
+
+這是第二個答案，同樣寫得夠長，確保通過答案長度的檢查條件。
+"""
+
+
+def fixture_site(tmp: str):
+    """建立一份與真實內容無關的最小內容集，讓測試不依賴 content/ 的現況。"""
+    root = Path(tmp) / "fixture"
+    (root / "content").mkdir(parents=True)
+    (root / "content" / "about.md").write_text(FIXTURE_ABOUT, encoding="utf-8")
+    (root / "content" / "faq.md").write_text(FIXTURE_FAQ, encoding="utf-8")
+    return model.load(root)
+
+
 
 def check(name: str, condition: bool) -> None:
     global PASSED
@@ -74,8 +137,8 @@ def test_heading_rules() -> None:
 
 
 def test_structure_rules() -> None:
-    ks = model.load(V.ROOT)
     with tempfile.TemporaryDirectory() as tmp:
+        ks = fixture_site(tmp)
         bad = Path(tmp) / "bad.html"
         bad.write_text(
             "<html><head></head><body><h1>一</h1><h1>二</h1><h3>跳級</h3></body></html>",
@@ -141,10 +204,18 @@ def test_engine() -> None:
         check("樣板迴圈", engine.render("a.html", {"xs": [{"n": 1}, {"n": 2}]}) == "<i>1</i><i>2</i>")
         check("樣板反向區塊", engine.render("a.html", {"xs": []}) == "空")
 
-    ks = model.load(V.ROOT)
-    check("內容模型無錯誤", not ks.errors)
-    check("問答頁被辨識", ks.qa_page is not None and len(ks.qa_page.questions) > 0)
-    check("站台設定被讀到", bool(ks.site.get("contact", {}).get("email")))
+    with tempfile.TemporaryDirectory() as tmp:
+        ks = fixture_site(tmp)
+        check("內容模型無錯誤", not ks.errors)
+        check("問答頁被辨識", ks.qa_page is not None and len(ks.qa_page.questions) == 2)
+        check("站台設定被讀到", bool(ks.site.get("contact", {}).get("email")))
+        check("導覽依 nav_order 排序", [p.slug for p in ks.nav] == ["about", "faq"])
+
+        empty = Path(tmp) / "empty"
+        (empty / "content").mkdir(parents=True)
+        (empty / "content" / "faq.md").write_text("", encoding="utf-8")
+        check("空內容檔被辨識為 L0 空殼",
+              any("L0 空殼" in e for e in model.load(empty).errors))
 
 
 def main() -> int:

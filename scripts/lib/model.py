@@ -115,8 +115,12 @@ def load(root: Path) -> KnowledgeSite:
 
     for path in files:
         rel = path.relative_to(root).as_posix()
+        raw = path.read_text(encoding="utf-8")
+        if not raw.strip():
+            errors.append(f"{rel}: 尚未填寫內容（目前是 L0 空殼）")
+            continue
         try:
-            data, body = frontmatter.split(path.read_text(encoding="utf-8"), rel)
+            data, body = frontmatter.split(raw, rel)
         except frontmatter.ContentError as exc:
             errors.append(str(exc))
             continue

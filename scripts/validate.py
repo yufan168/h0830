@@ -5,7 +5,7 @@
     python3 scripts/validate.py           檢查內容與既有產出
     python3 scripts/validate.py --strict  把 REVIEW 等級的提醒也視為失敗
 
-離開碼 0 代表通過，1 代表有 GATE 級錯誤。
+離開碼 0 代表通過，1 代表有 GATE 級錯誤，2 代表內容尚未填寫（L0 空殼）。
 規則編號對應 design/brief.md，方便回頭查是哪一條契約。
 """
 
@@ -116,6 +116,13 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="檢查客服知識頁的內容與版型契約")
     parser.add_argument("--strict", action="store_true", help="把 REVIEW 提醒視為失敗")
     args = parser.parse_args()
+
+    content_files = sorted((ROOT / "content").glob("*.md"))
+    if content_files and all(not f.read_text(encoding="utf-8").strip() for f in content_files):
+        print("目前是 L0 空殼：content/ 底下的內容檔都還沒填寫。")
+        print("骨架與引擎已就緒，填入內容後再執行一次即可進行完整檢查。")
+        print(f"待填檔案：{', '.join(f.name for f in content_files)}")
+        return 2
 
     report = Report()
     ks = model.load(ROOT)
