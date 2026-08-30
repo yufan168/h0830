@@ -1,141 +1,119 @@
-"""把 content/ 載入成結構化的知識庫模型。
+"""把 content/*.md 載入成結構化的知識頁模型。
 
 build.py 與 validate.py 共用這一份載入邏輯，確保「產出」與「驗證」
 對內容契約的理解不會分岔。
+
+內容契約：
+- 每個 .md 檔對應一個產出頁面，frontmatter 定義該頁的識別與導覽位置。
+- 正文以 `##` 切成區塊。faq.md 的 `##` 是分類、`###` 是問題；
+  其他頁的 `##` 是章節、`###` 是子節。
 """
 
 from __future__ import annotations
 
-import datetime as dt
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import frontmatter, markdown
 
-REQUIRED_FIELDS = ("id", "title", "category", "summary", "tags", "status", "owner", "updated")
-OPTIONAL_FIELDS = ("weight", "related", "noindex")
-STATUSES = {
-    "published": {"label": "已發布", "css": "is-published"},
-    "review": {"label": "審核中", "css": "is-review"},
-    "deprecated": {"label": "已停用", "css": "is-deprecated"},
-}
-ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+REQUIRED_FIELDS = ("title", "slug", "description", "updated", "owner", "nav_order", "nav_label")
+OPTIONAL_FIELDS = ("icon", "site", "noindex")
+QA_SLUG = "faq"
+SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 @dataclass
-class Card:
+class Item:
+    """問答頁裡的單一問題。"""
+
     id: str
     title: str
-    category: str
-    summary: str
-    tags: list
-    status: str
-    owner: str
-    updated: str
-    weight: int
-    related: list
-    body: str
     html: str
-    headings: list
-    source: Path
-
-    @property
-    def url(self) -> str:
-        return f"/a/{self.id}/"
-
-    @property
-    def listed(self) -> bool:
-        """是否出現在首頁與分類頁清單。停用的知識卡只保留內頁。"""
-        return self.status != "deprecated"
-
-    @property
-    def status_label(self) -> str:
-        return STATUSES[self.status]["label"]
-
-    @property
-    def status_css(self) -> str:
-        return STATUSES[self.status]["css"]
+    text: str
 
 
 @dataclass
-class Category:
+class Section:
+    """一個 `##` 區塊。章節頁用 html，問答頁用 items。"""
+
     id: str
-    name: str
-    summary: str
-    icon: str
-    weight: int
-    cards: list = field(default_factory=list)
-
-    @property
-    def url(self) -> str:
-        return f"/c/{self.id}/"
-
-    @property
-    def listed_cards(self) -> list:
-        return [c for c in self.cards if c.listed]
-
-    @property
-    def count(self) -> int:
-        return len(self.listed_cards)
+    title: str
+    html: str
+    text: str
+    items: list = field(default_factory=list)
 
 
 @dataclass
-class KnowledgeBase:
+class Page:
+    slug: str
+    title: str
+    description: str
+    updated: str
+    owner: str
+    nav_order: int
+    nav_label: str
+    icon: str
+    intro_html: str
+    sections: list
+    source: Path
+    raw_body: str
+
+    @property
+    def is_qa(self) -> bool:
+        return self.slug == QA_SLUG
+
+    @property
+    def filename(self) -> str:
+        return f"{self.slug}.html"
+
+    @property
+    def path(self) -> str:
+        return f"/{self.slug}.html"
+
+    @property
+    def questions(self) -> list:
+        return [item for section in self.sections for item in section.items]
+
+
+@dataclass
+class KnowledgeSite:
     site: dict
-    categories: list
-    cards: list
+    pages: list
     errors: list
 
     @property
-    def by_id(self) -> dict:
-        return {c.id: c for c in self.cards}
+    def nav(self) -> list:
+        return sorted(self.pages, key=lambda p: (p.nav_order, p.slug))
+
+    def page(self, slug: str):
+        return next((p for p in self.pages if p.slug == slug), None)
 
     @property
-    def listed_cards(self) -> list:
-        return [c for c in self.cards if c.listed]
-
-    def category(self, cid: str):
-        return next((c for c in self.categories if c.id == cid), None)
+    def qa_page(self):
+        return self.page(QA_SLUG)
 
     def popular(self, limit: int = 6) -> list:
-        ranked = sorted(self.listed_cards, key=lambda c: (c.weight, c.id))
-        return ranked[:limit]
-
-    def recent(self, limit: int = 5) -> list:
-        return sorted(self.listed_cards, key=lambda c: (c.updated, c.id), reverse=True)[:limit]
+        page = self.qa_page
+        return page.questions[:limit] if page else []
 
 
-def load(root: Path) -> KnowledgeBase:
+_H2 = re.compile(r"^##\s+(.*)$")
+_H3 = re.compile(r"^###\s+(.*)$")
+
+
+def load(root: Path) -> KnowledgeSite:
     root = Path(root)
     errors: list[str] = []
+    pages: list[Page] = []
+    site: dict = {}
 
-    taxonomy_path = root / "content" / "taxonomy.yml"
-    if not taxonomy_path.exists():
-        raise frontmatter.ContentError("找不到 content/taxonomy.yml")
-    taxonomy = frontmatter.parse_yaml(taxonomy_path.read_text(encoding="utf-8"), str(taxonomy_path))
+    files = sorted((root / "content").glob("*.md"))
+    if not files:
+        errors.append("content/ 底下沒有任何 .md 內容檔")
 
-    site = dict(taxonomy.get("site") or {})
-    categories = []
-    for raw in taxonomy.get("categories") or []:
-        missing = [k for k in ("id", "name", "summary") if not raw.get(k)]
-        if missing:
-            errors.append(f"content/taxonomy.yml: 分類 {raw.get('id', '?')} 缺少欄位 {', '.join(missing)}")
-            continue
-        categories.append(
-            Category(
-                id=str(raw["id"]),
-                name=str(raw["name"]),
-                summary=str(raw["summary"]),
-                icon=str(raw.get("icon") or "📄"),
-                weight=int(raw.get("weight") or 999),
-            )
-        )
-    categories.sort(key=lambda c: (c.weight, c.id))
-
-    cards = []
-    for path in sorted((root / "content" / "faq").glob("*.md")):
+    for path in files:
         rel = path.relative_to(root).as_posix()
         try:
             data, body = frontmatter.split(path.read_text(encoding="utf-8"), rel)
@@ -150,49 +128,114 @@ def load(root: Path) -> KnowledgeBase:
 
         unknown = sorted(set(data) - set(REQUIRED_FIELDS) - set(OPTIONAL_FIELDS))
         if unknown:
-            errors.append(f"{rel}: frontmatter 出現未定義欄位 {', '.join(unknown)}，請先更新 CLAUDE.md 的欄位契約")
+            errors.append(
+                f"{rel}: frontmatter 出現未定義欄位 {', '.join(unknown)}，"
+                "請先更新 CLAUDE.md 的欄位契約再新增"
+            )
 
-        status = str(data["status"])
-        if status not in STATUSES:
-            errors.append(f"{rel}: status「{status}」不合法，只能是 {', '.join(STATUSES)}")
-            continue
+        if isinstance(data.get("site"), dict):
+            if site:
+                errors.append(f"{rel}: site 設定區塊重複，全站只能有一個檔案帶 site:")
+            site = data["site"]
 
-        html_body, headings = markdown.render(body)
-        cards.append(
-            Card(
-                id=str(data["id"]),
+        slug = str(data["slug"])
+        seen: dict[str, int] = {}
+        intro_html, sections = _parse_body(body, slug == QA_SLUG, seen)
+
+        pages.append(
+            Page(
+                slug=slug,
                 title=str(data["title"]),
-                category=str(data["category"]),
-                summary=str(data["summary"]),
-                tags=[str(t) for t in (data["tags"] or [])],
-                status=status,
-                owner=str(data["owner"]),
+                description=str(data["description"]),
                 updated=str(data["updated"]),
-                weight=int(data.get("weight") or 500),
-                related=[str(r) for r in (data.get("related") or [])],
-                body=body,
-                html=html_body,
-                headings=headings,
+                owner=str(data["owner"]),
+                nav_order=int(data["nav_order"]),
+                nav_label=str(data["nav_label"]),
+                icon=str(data.get("icon") or "📄"),
+                intro_html=intro_html,
+                sections=sections,
                 source=path,
+                raw_body=body,
             )
         )
 
-    known = {c.id for c in categories}
-    for card in cards:
-        category = next((c for c in categories if c.id == card.category), None)
-        if category is None:
-            errors.append(
-                f"{card.source.name}: category「{card.category}」不在 taxonomy.yml，"
-                f"可用分類為 {', '.join(sorted(known))}"
-            )
+    if not site:
+        errors.append("找不到站台設定，請在其中一個內容檔的 frontmatter 加上 site: 區塊")
+
+    seen_slugs: dict[str, str] = {}
+    for page in pages:
+        if page.slug in seen_slugs:
+            errors.append(f"{page.source.name}: slug「{page.slug}」與 {seen_slugs[page.slug]} 重複")
+        seen_slugs[page.slug] = page.source.name
+
+    return KnowledgeSite(site=site, pages=pages, errors=errors)
+
+
+def _parse_body(body: str, is_qa: bool, seen: dict) -> tuple[str, list]:
+    """把正文依 `##`（與問答頁的 `###`）切段並各自渲染。"""
+    lines = body.replace("\r\n", "\n").split("\n")
+    intro: list[str] = []
+    groups: list[tuple[str, list[str]]] = []
+    current: list[str] | None = None
+
+    for line in lines:
+        match = _H2.match(line.strip()) if not line.startswith("    ") else None
+        if match and not _in_code(intro if current is None else current):
+            current = []
+            groups.append((match.group(1).strip(), current))
             continue
-        category.cards.append(card)
+        (intro if current is None else current).append(line)
 
-    for category in categories:
-        category.cards.sort(key=lambda c: (c.weight, c.updated, c.id))
+    intro_html, _ = markdown.render("\n".join(intro).strip())
+    sections = []
+    for title, block in groups:
+        anchor = _unique(markdown.slugify(title), seen)
+        text = "\n".join(block).strip()
+        if is_qa:
+            items = _parse_items(block, seen)
+            sections.append(Section(id=anchor, title=title, html="", text=_plain(text), items=items))
+        else:
+            html, _ = markdown.render(text)
+            sections.append(Section(id=anchor, title=title, html=html, text=_plain(text)))
+    return intro_html, sections
 
-    return KnowledgeBase(site=site, categories=categories, cards=cards, errors=errors)
+
+def _parse_items(block: list[str], seen: dict) -> list:
+    items = []
+    title = None
+    buf: list[str] = []
+    for line in block:
+        match = _H3.match(line.strip())
+        if match:
+            if title is not None:
+                items.append(_make_item(title, buf, seen))
+            title = match.group(1).strip()
+            buf = []
+        elif title is not None:
+            buf.append(line)
+    if title is not None:
+        items.append(_make_item(title, buf, seen))
+    return items
 
 
-def today() -> str:
-    return dt.date.today().isoformat()
+def _make_item(title: str, buf: list[str], seen: dict) -> Item:
+    text = "\n".join(buf).strip()
+    html, _ = markdown.render(text)
+    return Item(id=_unique(markdown.slugify(title), seen), title=title, html=html, text=_plain(text))
+
+
+def _in_code(lines: list[str]) -> bool:
+    return sum(1 for line in lines if line.strip().startswith("```")) % 2 == 1
+
+
+def _unique(base: str, seen: dict) -> str:
+    seen[base] = seen.get(base, 0) + 1
+    return base if seen[base] == 1 else f"{base}-{seen[base]}"
+
+
+def _plain(text: str) -> str:
+    """把 Markdown 壓成純文字，供搜尋索引使用。"""
+    text = re.sub(r"```.*?```", " ", text, flags=re.S)
+    text = re.sub(r"^[#>|\-*\d.]+\s*", " ", text, flags=re.M)
+    text = re.sub(r"[`*\[\]()|]", " ", text)
+    return re.sub(r"\s+", " ", text).strip()

@@ -1,0 +1,156 @@
+# Design Brief｜官網客服知識頁版型規範
+
+- 版本：2.0.0
+- 對應 token：`design/tokens.json` v1.0.0
+- 狀態：**凍結契約**。AI 在日常維護知識頁時不得自行更動本檔。要改版型必須由人類先修訂本檔並升版號，再調整 `templates/` 與 `assets/style.css`，並在 `memory/decisions.md` 留下決策紀錄。
+
+本檔是版型的唯一真實來源。每條規則標記執行方式：
+
+| 標記 | 意義 |
+| --- | --- |
+| `[GATE]` | 驗證器 `scripts/validate.py` 會擋，違反即無法交付 |
+| `[REVIEW]` | 機器無法完全判定，交由人工審查 |
+
+---
+
+## 1. 設計哲學
+
+客服知識頁的首要任務，是讓焦慮中的使用者在最短時間找到答案。版型的優先順序是：**可掃描 > 可讀 > 美觀**。
+
+1. 每一頁都要能在三秒內回答「我在哪裡、我要找的答案在不在這頁」。
+2. 不使用輪播、不使用進場動畫、不使用需要滑鼠停留才出現的關鍵資訊。
+3. 沒有 JavaScript 也要能讀完全部內容。搜尋與主題切換屬於漸進增強，問答展開一律使用原生 `details` 元素。
+
+## 2. 站台結構
+
+`[GATE]` 產出必須剛好是下列五頁，不多不少，一頁對應一個內容檔：
+
+| 產出檔 | 來源 | 頁型 |
+| --- | --- | --- |
+| `site/index.html` | 由所有內容檔彙整 | 首頁 |
+| `site/products.html` | `content/products.md` | 章節頁 |
+| `site/faq.html` | `content/faq.md` | 問答頁 |
+| `site/policy.html` | `content/policy.md` | 章節頁 |
+| `site/about.html` | `content/about.md` | 章節頁 |
+
+另需產出 `site/404.html`、`site/search-index.json`、`site/sitemap.xml`、`site/robots.txt` 與 `site/assets/`。
+
+## 3. 全站共用骨架
+
+`[GATE]` 每一個產出頁面都必須依序具備下列結構節點：
+
+1. `.skip-link`：跳至主要內容的鍵盤捷徑，聚焦前隱藏、聚焦後可見。
+2. `header.site-header`：品牌標誌連回首頁、主導覽 `nav.site-nav`、主題切換按鈕。
+3. `main#main`：主要內容區，必須帶 `id="main"` 供 skip link 對應。
+4. `footer.site-footer`：包含知識庫版本與最後建置時間。
+
+`[GATE]` 每頁 `<head>` 必須有唯一的 `<title>`、`<meta name="description">`、`<link rel="canonical">`。
+
+`[GATE]` 主導覽的項目與順序由內容檔 frontmatter 的 `nav_order` 決定，不得寫死在樣板。
+
+### 3.1 容器與間距
+
+- 內容容器最大寬度 `var(--layout-container)`，兩側內距 `var(--space-5)`。
+- 內文段落行寬上限 `var(--layout-measure)`。
+- 垂直節奏一律取自 `--space-*` 刻度，不得出現刻度以外的魔術數字。
+
+## 4. 四種頁型
+
+### 4.1 首頁
+
+由上而下：頁面標題區、搜尋列、四張主題導覽卡、熱門問題清單、聯絡客服區塊。
+
+- 導覽卡格線：桌機三欄、平板兩欄、手機單欄。
+- 熱門問題取 `content/faq.md` 的前六個問題，僅顯示標題並連到 `faq.html` 的對應錨點。
+- `[GATE]` 首頁必須出現搜尋列 `#kb-search` 與聯絡客服區塊 `.contact-cta`。
+
+### 4.2 問答頁
+
+`[GATE]` 依序必須具備：
+
+1. `nav.breadcrumb`：首頁 > 本頁。
+2. `h1.page-title`。
+3. `.page-meta`：更新日期與負責窗口。
+4. `nav.toc`：分類目錄，錨點連到各 `h2`。
+5. 每個分類一個 `section.qa-group`，內含 `h2` 與若干 `details.qa-item`。
+6. `.contact-cta`。
+
+`details.qa-item` 的 `summary` 即問題本身，必須帶穩定錨點 `id`，讓外部可以直連單一問題。首頁與搜尋結果連進來時，該題必須自動展開。
+
+### 4.3 章節頁
+
+`[GATE]` 依序必須具備：`nav.breadcrumb`、`h1.page-title`、`.page-meta`、`nav.toc`、`article.page-body`、`.contact-cta`。
+
+正文中的 `h2` 全部進入目錄，`h3` 不進目錄。
+
+### 4.4 404 頁
+
+提供搜尋列與回首頁連結，不得只顯示錯誤碼。
+
+## 5. 元件規格
+
+### 5.1 主導覽 `nav.site-nav`
+
+- 目前所在頁面的連結必須帶 `aria-current="page"` 並有可見的視覺區別。
+- 手機寬度下改為橫向捲動，不使用漢堡選單，避免多一次點擊。
+
+### 5.2 目錄 `nav.toc`
+
+- 位於 `h1` 與正文之間，行動裝置上維持在同一位置，不做浮動側欄。
+- 項目數少於兩項時整個目錄不輸出。
+
+### 5.3 問答項目 `details.qa-item`
+
+- 收合狀態只顯示問題；展開後顯示答案全文。
+- `summary` 必須有可見的展開指示符號，且移除瀏覽器預設三角形時要自行補上。
+- 每題右側提供「複製連結」按鈕，屬漸進增強，無 JavaScript 時不顯示。
+
+### 5.4 搜尋
+
+- 純前端搜尋，讀取建置時產出的 `search-index.json`，比對標題與內文。
+- 無結果時顯示「找不到相符的問題」與聯絡客服連結，不得留白。
+- `[REVIEW]` 搜尋輸入框必須有可見標籤或 `aria-label`。
+
+### 5.5 聯絡客服區塊 `.contact-cta`
+
+固定三個資訊：服務時間、客服信箱、問題回報連結。文案由 `content/about.md` frontmatter 的 `site.contact` 提供，`[GATE]` 不得寫死在樣板或樣式表。
+
+## 6. 色彩與主題
+
+- `[GATE]` `site/assets/style.css` 內除了 `:root` token 宣告區塊外，不得出現任何 `#RRGGBB` 或 `rgb()` 字面值，一律使用 `var(--color-*)`。
+- 支援三態主題：跟隨系統、強制淺色、強制深色，以 `data-theme` 屬性切換，選擇存於 `localStorage`。
+- `[REVIEW]` 內文與背景對比需達 WCAG AA（4.5:1），大標題至少 3:1。
+
+## 7. 字體與文字
+
+- 字級只能取自 `--size-*` 刻度。
+- H1 使用 `--size-3xl`，H2 `--size-xl`，H3 `--size-lg`，內文 `--size-md`。
+- `[GATE]` 中文內容一律使用全形標點，且全站禁用破折號。理由是破折號在客服語境容易造成斷句誤讀，且中英標點混用會破壞字距。
+
+## 8. 響應式
+
+| 斷點 | 行為 |
+| --- | --- |
+| `< 480px` | 單欄，導覽卡收成一欄，主導覽與麵包屑允許橫向捲動 |
+| `480px 至 1024px` | 導覽卡兩欄 |
+| `> 1024px` | 導覽卡三欄，內文維持單欄置中 |
+
+`[GATE]` 任何情況下不得出現橫向捲軸，寬元素（表格、程式碼區塊）自行以 `overflow-x: auto` 內捲。
+
+## 9. 無障礙
+
+- `[GATE]` 每頁只有一個 `<h1>`。
+- `[GATE]` 標題階層不得跳級，`h2` 之後才可出現 `h3`。
+- 所有可互動元素需有可見的 `:focus-visible` 外框，寬度 2px，顏色 `--color-brand`。
+- `[REVIEW]` 圖片一律提供 `alt`，裝飾性圖片給空字串。
+
+## 10. 列印
+
+- 列印時隱藏頁首導覽、主題切換、搜尋列、目錄與聯絡客服區塊。
+- `[GATE]` 列印時所有 `details` 必須強制展開，避免印出空白的問答頁。
+- 內頁列印需保留標題、更新日期與正文，並在頁尾附上該頁網址。
+
+## 11. 效能
+
+- `[GATE]` 不得引用任何外部 CDN 的 JavaScript、CSS 或字型檔，全部資源同源自帶。
+- `[REVIEW]` 單頁 HTML 未壓縮大小建議在 120KB 以內。

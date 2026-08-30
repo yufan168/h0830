@@ -1,0 +1,33 @@
+{{> breadcrumb}}
+
+<h1 class="page-title">{{page.title}}</h1>
+
+<p class="page-meta">
+  <span class="page-meta-item">更新於 {{page.updated}}</span>
+  <span class="page-meta-item">負責窗口 {{page.owner}}</span>
+</p>
+
+{{#page.intro_html}}<div class="page-intro">{{{page.intro_html}}}</div>{{/page.intro_html}}
+
+{{> toc}}
+
+{{#sections}}
+<section class="qa-group" id="{{id}}" aria-labelledby="h-{{id}}">
+  <h2 id="h-{{id}}">{{title}}</h2>
+  {{#items}}
+  <details class="qa-item" id="{{id}}">
+    <summary class="qa-question">
+      <span class="qa-question-text">{{title}}</span>
+    </summary>
+    <div class="qa-answer">
+      {{{html}}}
+      <p class="qa-permalink"><a href="#{{id}}" data-copy-link>複製這一題的連結</a></p>
+    </div>
+  </details>
+  {{/items}}
+</section>
+{{/sections}}
+
+<p class="print-url">本頁網址：{{canonical}}</p>
+
+{{> contact}}
