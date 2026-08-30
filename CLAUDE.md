@@ -11,4 +11,5 @@ AI 做：讀 content/ 生成頁面、套用版型、指出 content/ 的缺漏與
 
 ## 今日暫行規則
 現在是架構建立階段。未經我明確指示，不得生成 site/ 底下的任何檔案，
-不得讀取 source/ 的內容，不得填寫 content/ 的任何內容
+不得讀取 source/ 的內容，不得填寫 content/ 的任何內容。
+本段優先於上方 Capability 與 Boundary，於 source/ 放入原始資料後自動失效。
