@@ -6,7 +6,8 @@
     python3 scripts/validate.py --strict  把 REVIEW 等級的提醒也視為失敗
 
 離開碼 0 代表通過，1 代表有 GATE 級錯誤，2 代表內容尚未填寫（L0 空殼）。
-規則編號對應 design/brief.md，方便回頭查是哪一條契約。
+規則編號對應 design/layout-contract.md，方便回頭查是哪一條契約。
+design/brief.md 是品牌與內容取向的簡報，不含編號規則。
 """
 
 from __future__ import annotations
