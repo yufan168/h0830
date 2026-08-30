@@ -115,24 +115,26 @@
   var results = root.querySelector("[data-search-results]");
   var hint = root.querySelector("[data-search-hint]");
   var entries = null;
-  var loading = false;
+  var pending = null;
 
+  /* 快取進行中的請求本身，而不是用布林旗標。
+     用旗標的話，focus 觸發的載入還在飛時，接著的 input 會拿到一個
+     已完成的 promise，於是在資料到達前就渲染，結果永遠是零筆。 */
   function load() {
-    if (entries || loading) return Promise.resolve();
-    loading = true;
-    return fetch("search-index.json")
+    if (entries) return Promise.resolve();
+    if (pending) return pending;
+    pending = fetch("search-index.json")
       .then(function (res) {
         return res.json();
       })
       .then(function (data) {
         entries = data;
-        loading = false;
       })
       .catch(function () {
-        loading = false;
         entries = [];
         if (hint) hint.textContent = "搜尋索引載入失敗，請直接瀏覽上方主題。";
       });
+    return pending;
   }
 
   function escapeHtml(text) {
