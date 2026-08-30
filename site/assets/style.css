@@ -2,7 +2,112 @@
    規範：本檔不得出現任何色碼字面值，色彩一律使用 design/tokens.json 產生的 var(--color-*)。
    建置時 scripts/build.py 會把 token 宣告插入下方標記處。 */
 
-/* @tokens */
+/* 以下由 scripts/build.py 依 design/tokens.json 產生，請勿手動編輯。 */
+:root {
+  color-scheme: light dark;
+  --color-bg: #FAF7F2;
+  --color-surface: #FFFCF7;
+  --color-surface-alt: #F3EDE4;
+  --color-border: #E4DBCF;
+  --color-border-strong: #CDBFAE;
+  --color-text: #2B2B2B;
+  --color-text-muted: #6E655C;
+  --color-text-inverse: #FFFCF7;
+  --color-brand: #B85614;
+  --color-brand-strong: #8F4110;
+  --color-brand-tint: #FBEADD;
+  --color-accent: #2F6F4F;
+  --color-accent-tint: #E4EFE8;
+  --color-warn: #9A6212;
+  --color-warn-tint: #FAEFDC;
+  --color-danger: #A63426;
+  --color-danger-tint: #F8E7E4;
+  --color-code-bg: #F3EDE4;
+  --color-brand-vivid: #E8752A;
+  --shadow-card: 0 1px 2px rgba(21, 29, 43, 0.06), 0 6px 18px rgba(21, 29, 43, 0.05);
+  --shadow-raised: 0 2px 6px rgba(21, 29, 43, 0.10), 0 14px 32px rgba(21, 29, 43, 0.09);
+  --font-sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Roboto Mono", monospace;
+  --size-xs: 0.75rem;
+  --size-sm: 0.875rem;
+  --size-base: 1rem;
+  --size-md: 1.0625rem;
+  --size-lg: 1.25rem;
+  --size-xl: 1.5rem;
+  --size-2xl: 1.875rem;
+  --size-3xl: 2.375rem;
+  --leading-tight: 1.3;
+  --leading-normal: 1.8;
+  --leading-loose: 1.85;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --layout-container: 1120px;
+  --layout-measure: 720px;
+  --layout-header-h: 64px;
+  --layout-bp-sm: 480px;
+  --layout-bp-md: 768px;
+  --layout-bp-lg: 1024px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #1C1917;
+    --color-surface: #24201D;
+    --color-surface-alt: #2C2724;
+    --color-border: #383129;
+    --color-border-strong: #4E453A;
+    --color-text: #EFE9E1;
+    --color-text-muted: #ABA096;
+    --color-text-inverse: #1C1917;
+    --color-brand: #F5904C;
+    --color-brand-strong: #FFB27C;
+    --color-brand-tint: #33241A;
+    --color-accent: #6FBF92;
+    --color-accent-tint: #17301F;
+    --color-warn: #DCA45A;
+    --color-warn-tint: #33280F;
+    --color-danger: #EE8878;
+    --color-danger-tint: #3A1D18;
+    --color-code-bg: #201C19;
+    --color-brand-vivid: #F5904C;
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 6px 18px rgba(0, 0, 0, 0.35);
+    --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 14px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #1C1917;
+  --color-surface: #24201D;
+  --color-surface-alt: #2C2724;
+  --color-border: #383129;
+  --color-border-strong: #4E453A;
+  --color-text: #EFE9E1;
+  --color-text-muted: #ABA096;
+  --color-text-inverse: #1C1917;
+  --color-brand: #F5904C;
+  --color-brand-strong: #FFB27C;
+  --color-brand-tint: #33241A;
+  --color-accent: #6FBF92;
+  --color-accent-tint: #17301F;
+  --color-warn: #DCA45A;
+  --color-warn-tint: #33280F;
+  --color-danger: #EE8878;
+  --color-danger-tint: #3A1D18;
+  --color-code-bg: #201C19;
+  --color-brand-vivid: #F5904C;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.45), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.5), 0 14px 32px rgba(0, 0, 0, 0.45);
+}
 
 *,
 *::before,

@@ -5,34 +5,30 @@
 
 {{> search}}
 
-<section class="section" aria-labelledby="cat-heading">
-  <h2 id="cat-heading" class="section-title">依主題瀏覽</h2>
-  <ul class="category-grid">
-  {{#categories}}
-    <li class="category-card">
-      <a class="category-link" href="{{href}}">
-        <span class="category-icon" aria-hidden="true">{{icon}}</span>
-        <span class="category-name">{{name}}</span>
+<section class="section" aria-labelledby="nav-heading">
+  <h2 id="nav-heading" class="section-title">依主題瀏覽</h2>
+  <ul class="topic-grid">
+  {{#topics}}
+    <li class="topic-card">
+      <a class="topic-link" href="{{href}}">
+        <span class="topic-icon" aria-hidden="true">{{icon}}</span>
+        <span class="topic-name">{{title}}</span>
       </a>
-      <p class="category-summary">{{summary}}</p>
-      <p class="category-count">{{count}} 則問題</p>
+      <p class="topic-summary">{{description}}</p>
+      <p class="topic-count">{{count}} 個{{unit}}</p>
     </li>
-  {{/categories}}
+  {{/topics}}
   </ul>
 </section>
 
 <section class="section" aria-labelledby="hot-heading">
   <h2 id="hot-heading" class="section-title">熱門問題</h2>
-  {{> card-list}}
-</section>
-
-<section class="section" aria-labelledby="recent-heading">
-  <h2 id="recent-heading" class="section-title">最近更新</h2>
-  <ul class="recent-list">
-  {{#recent}}
-    <li><a href="{{href}}">{{title}}</a><span class="recent-date">{{updated}}</span></li>
-  {{/recent}}
+  <ul class="hot-list">
+  {{#popular}}
+    <li><a href="{{href}}">{{title}}</a></li>
+  {{/popular}}
   </ul>
+  <p class="more-link"><a href="faq.html">看全部常見問題</a></p>
 </section>
 
 {{> contact}}

@@ -1,0 +1,25 @@
+{{> breadcrumb}}
+
+<h1 class="page-title">{{page.title}}</h1>
+
+<p class="page-meta">
+  <span class="page-meta-item">更新於 {{page.updated}}</span>
+  {{#page.owner}}<span class="page-meta-item">負責窗口 {{page.owner}}</span>{{/page.owner}}
+</p>
+
+{{#page.intro_html}}<div class="page-intro">{{{page.intro_html}}}</div>{{/page.intro_html}}
+
+{{> toc}}
+
+<article class="page-body">
+{{#sections}}
+  <section class="body-section" id="{{id}}">
+    <h2>{{title}}</h2>
+    {{{html}}}
+  </section>
+{{/sections}}
+</article>
+
+<p class="print-url">本頁網址：{{canonical}}</p>
+
+{{> contact}}

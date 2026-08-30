@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{site.locale}}" data-theme="auto">
+<html lang="{{site.locale}}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,7 +9,7 @@
 <meta property="og:title" content="{{page_title}}" />
 <meta property="og:description" content="{{page_description}}" />
 <meta property="og:type" content="website" />
-<link rel="stylesheet" href="{{rel}}assets/style.css" />
+<link rel="stylesheet" href="assets/style.css" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='14' font-size='14'%3E%F0%9F%92%A1%3C/text%3E%3C/svg%3E" />
 <script>
 (function(){try{var t=localStorage.getItem('kb-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
@@ -19,13 +19,20 @@
 <a class="skip-link" href="#main">跳到主要內容</a>
 <header class="site-header">
   <div class="container header-inner">
-    <a class="brand" href="{{rel}}index.html">
+    <a class="brand" href="index.html">
       <span class="brand-mark" aria-hidden="true">💡</span>
       <span class="brand-text">
         <strong>{{site.name}}</strong>
         <span>{{site.kb_name}}</span>
       </span>
     </a>
+    <nav class="site-nav" aria-label="主導覽">
+      <ul>
+      {{#nav}}
+        <li><a href="{{href}}"{{#active}} aria-current="page"{{/active}}>{{label}}</a></li>
+      {{/nav}}
+      </ul>
+    </nav>
     <button type="button" class="theme-toggle" data-theme-toggle aria-label="切換淺色或深色主題">
       <span aria-hidden="true">◐</span>
       <span class="theme-toggle-text">主題</span>
@@ -38,9 +45,10 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <p class="footer-line">{{site.name}}{{site.kb_name}}｜知識庫版本 {{site.version}}</p>
+    <p class="footer-line">客服信箱 <a href="mailto:{{site.contact.email}}">{{site.contact.email}}</a></p>
     <p class="footer-line footer-muted">最後建置時間 {{build_time}}</p>
   </div>
 </footer>
-<script src="{{rel}}assets/app.js" defer></script>
+<script src="assets/app.js" defer></script>
 </body>
 </html>

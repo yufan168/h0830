@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./restricted/**)",
+      "Edit(./restricted/**)",
+      "Write(./restricted/**)",
+      "Bash(cat ./restricted/**)",
+      "Bash(head ./restricted/**)",
+      "Bash(tail ./restricted/**)",
+      "Bash(less ./restricted/**)",
+      "Bash(grep:* ./restricted/**)",
+      "Bash(cp ./restricted/**)",
+      "Read(./inbox/**)",
+      "Edit(./source/**)",
+      "Write(./source/**)"
+    ],
+    "ask": [
+      "Write(./content/**)",
+      "Edit(./content/**)"
+    ],
+    "allow": [
+      "Read(./design/**)",
+      "Read(./source/**)",
+      "Edit(./site/**)",
+      "Edit(./memory/**)",
+      "Bash(python3 scripts/build.py:*)",
+      "Bash(python3 scripts/validate.py:*)",
+      "Bash(python3 scripts/selftest.py:*)",
+      "Bash(python3 -m http.server:*)"
+    ]
+  }
+}
